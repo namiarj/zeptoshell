@@ -39,7 +39,7 @@ sigint_handler(int signum)
 }
 
 void
-wait_child(int signum)
+sigchld_handler(int signum)
 {
 	wait(NULL);
 	print_bg();
@@ -49,7 +49,7 @@ void
 init_sig()
 {
 	signal(SIGINT, sigint_handler);
-	signal(SIGCHLD, wait_child);
+	signal(SIGCHLD, sigchld_handler);
 }
 
 void
