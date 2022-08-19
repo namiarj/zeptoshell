@@ -4,7 +4,7 @@
 #include "zeptoshell.h"
 
 int
-main(void)
+main()
 {
 	char line[LINE_MAX];
 	init_sig();
