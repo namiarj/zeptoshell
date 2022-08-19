@@ -34,7 +34,7 @@ void
 sigint_handler(int signum)
 {
 	sig_caught = true;
-	puts("");
+	putc('\n', stdout);
 	prompt();
 }
 
