@@ -130,8 +130,7 @@ parse_line(const char *line, struct cmd_s *cmds)
 	case '\r':
 	case '\t':
 	case '\v':
-	  	while (isspace(line[i + 1]))
-			i++;
+	  	while (isspace(line[i + 1])) i++;
 		cmds[count].argv[arg][j] = '\0';
 		if (!is_special(line[i + 1]))
 			cmds[count].argv[++arg] = malloc(CMD_MAX);
@@ -145,14 +144,13 @@ next_cmd:
 		arg = j = 0;
 		cmds[count].argv = malloc(sizeof(char*) * CMD_MAX);
 		cmds[count].argv[arg] = malloc(CMD_MAX);
-		while (isspace(line[i + 1]))
-			i++;
+		while (isspace(line[i + 1])) i++;
 		break;
-	case '&':
-		cmds[count].bg = true;
-		goto next_cmd;
 	case '|':
 		cmds[count].piped = true;
+		goto next_cmd;
+	case '&':
+		cmds[count].bg = true;
 		goto next_cmd;
 	default:
 		cmds[count].argv[arg][j] = line[i];
@@ -181,7 +179,8 @@ builtin(char *argv[])
 	case 1:
 		exit(0);
 	}
-	return (0);
+	
+	return (-1);
 }
 
 void
@@ -215,9 +214,9 @@ run_cmds(struct cmd_s *cmds, int count)
 				printf("[%d] %d\n", bg_count, pid);
 				bg_pid[bg_count++] = pid;
 			} else waitpid(pid, &status, 0);
-			close(p[1]);
 			if (cmds[i].piped) fd_in = p[0];
 			else fd_in = 0;
+			close(p[1]);
 		}
 	}
 }
