@@ -80,12 +80,6 @@ read_line(char *line)
 		case '#':
 			comment = true;
 			break;
-		case ';':
-		case '&':
-		case '|':
-			comment = false;
-			line[i++] = c;
-			break;
 		case EOF:
 		case '\n':
 			line[i] = '\0';
@@ -136,6 +130,7 @@ parse_line(const char *line, struct cmd_s *cmds)
 			cmds[count].argv[++arg] = malloc(CMD_MAX);
 		j = 0;
 		break;
+	case '\n':
 	case ';':
 next_cmd:
 		if (i + 1 == len) break;
