@@ -12,7 +12,7 @@
 int bg_pid[CMD_MAX] = {0};
 int bg_count = 0;
 
-bool sig_caught = false;
+bool sigint_caught = false;
 
 struct cmd_s {
 	int		argc;
@@ -33,9 +33,11 @@ prompt()
 void
 sigint_handler(int signum)
 {
-	sig_caught = true;
-	putc('\n', stdout);
-	prompt();
+	sigint_caught = true;
+	if (isatty(0)) {
+		putc('\n', stdout);
+		prompt();
+	}
 }
 
 void
@@ -185,8 +187,8 @@ run_cmds(struct cmd_s *cmds, int count)
 	pid_t pid;
 
 	for (i = 0; i < count; i++) {
-		if (sig_caught) {
-			sig_caught = false;
+		if (sigint_caught) {
+			sigint_caught = false;
 			return;
 		}
 		if (builtin(cmds[i].argv) >= 0) continue;
