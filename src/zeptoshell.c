@@ -175,7 +175,7 @@ builtin(char *argv[])
 		exit(0);
 	}
 	
-	return (-1);
+	return (cmd);
 }
 
 void
@@ -189,7 +189,7 @@ run_cmds(struct cmd_s *cmds, int count)
 			sig_caught = false;
 			return;
 		}
-		if (builtin(cmds[i].argv)) continue;
+		if (builtin(cmds[i].argv) >= 0) continue;
 		pipe(p);
 		pid = fork();
 		switch (pid) {
