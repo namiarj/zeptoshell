@@ -15,10 +15,10 @@ int bg_count = 0;
 bool sigint_caught = false;
 
 struct cmd_s {
-	int		argc;
-	char		**argv;
-	bool		bg;
-	bool		piped;
+	int	argc;
+	char	**argv;
+	bool	bg;
+	bool	piped;
 };
 
 int
@@ -51,9 +51,9 @@ is_special(char c)
 	case ';':
 	case '&':
 	case '|':
-			return true;
+		return true;
 	default:
-			return false;
+		return false;
 	}
 }
 
@@ -79,7 +79,7 @@ print_bg()
 	if (all_zero) bg_count = 0;
 }
 
-int
+static int
 parse_line(const char *line, struct cmd_s *cmds)
 {
 	int count = 0, arg = 0, j = 0;
@@ -131,8 +131,8 @@ next_cmd:
 void
 prompt()
 {
-	putc('>', stdout);
-	putc(' ', stdout);
+	putchar('>');
+	putchar(' ');
 	fflush(stdout);
 }
 
@@ -162,7 +162,7 @@ read_line(char *line)
 	return (false);
 }
 
-void
+static void
 run_cmds(struct cmd_s *cmds, int count)
 {
 	int i, p[2], fd_in = 0, status;
@@ -209,19 +209,19 @@ run_line(char *line)
 	run_cmds(cmds, count);
 }
 
-void
+static void
 sigchld_handler(int signum)
 {
 	wait(NULL);
 	print_bg();
 }
 
-void
+static void
 sigint_handler(int signum)
 {
 	sigint_caught = true;
 	if (isatty(0)) {
-		putc('\n', stdout);
+		putchar('\n');
 		prompt();
 	}
 }
