@@ -19,32 +19,42 @@ struct cmd_s {
 	char		**argv;
 	bool		bg;
 	bool		piped;
-	int		pid;
 };
 
-void
-prompt()
+int
+builtin(char *argv[])
 {
-	putc('>', stdout);
-	putc(' ', stdout);
-	fflush(stdout);
-}
+	const char *builtin_cmd[2];
+	builtin_cmd[0] = "exit";
+	builtin_cmd[1] = "quit";
 
-void
-sigint_handler(int signum)
-{
-	sigint_caught = true;
-	if (isatty(0)) {
-		putc('\n', stdout);
-		prompt();
+	int cmd = -1;
+	for (int i = 0; i < 2; i++)
+	if (strcmp(builtin_cmd[i], argv[0]) == 0) {
+		cmd = i;
+		break;
 	}
+
+	switch (cmd) {
+	case 0:
+	case 1:
+		exit(0);
+	}
+	
+	return (cmd);
 }
 
-void
-sigchld_handler(int signum)
+static bool
+is_special(char c)
 {
-	wait(NULL);
-	print_bg();
+	switch (c) {
+	case ';':
+	case '&':
+	case '|':
+			return true;
+	default:
+			return false;
+	}
 }
 
 void
@@ -54,7 +64,7 @@ init_sig()
 	signal(SIGCHLD, sigchld_handler);
 }
 
-void
+static void
 print_bg()
 {
 	bool all_zero = true;
@@ -65,47 +75,8 @@ print_bg()
 			bg_pid[i] = 0;
 		}
 	}
-
+	
 	if (all_zero) bg_count = 0;
-}
-
-bool
-read_line(char *line)
-{
-	int i = 0;
-	char c;
-	bool comment = false;
-
-	while (i < LINE_MAX) {
-		c = getchar();
-		switch (c) {
-		case '#':
-			comment = true;
-			break;
-		case EOF:
-		case '\n':
-			line[i] = '\0';
-			return (true);
-		default:
-			if (!comment) line[i++] = c;
-		}
-	}
-
-	fputs("Command line too long", stderr);
-	return (false);
-}
-
-bool
-is_special(char c)
-{
-	switch (c) {
-	case ';':
-	case '&':
-	case '|':
-		return true;
-	default:
-		return false;
-	}
 }
 
 int
@@ -113,7 +84,7 @@ parse_line(const char *line, struct cmd_s *cmds)
 {
 	int count = 0, arg = 0, j = 0;
 	int len = strlen(line);
-
+	
 	cmds[count].argv = malloc(sizeof(char*) * CMD_MAX);
 	cmds[count].argv[arg] = malloc(CMD_MAX);
 
@@ -157,27 +128,38 @@ next_cmd:
 	return (count + 1);
 }
 
-int
-builtin(char *argv[])
+void
+prompt()
 {
-	const char *builtin_cmd[2];
-	builtin_cmd[0] = "exit";
-	builtin_cmd[1] = "quit";
+	putc('>', stdout);
+	putc(' ', stdout);
+	fflush(stdout);
+}
 
-	int cmd = -1;
-	for (int i = 0; i < 2; i++)
-	if (strcmp(argv[0], builtin_cmd[i]) == 0) {
-		cmd = i;
-		break;
+bool
+read_line(char *line)
+{
+	int i = 0;
+	char c;
+	bool comment = false;
+
+	while (i < LINE_MAX) {
+		c = getchar();
+		switch (c) {
+		case '#':
+			comment = true;
+			break;
+		case EOF:
+		case '\n':
+			line[i] = '\0';
+			return (true);
+		default:
+			if (!comment) line[i++] = c;
+		}
 	}
 
-	switch (cmd) {
-	case 0:
-	case 1:
-		exit(0);
-	}
-	
-	return (cmd);
+	fputs("Command line too long", stderr);
+	return (false);
 }
 
 void
@@ -226,3 +208,24 @@ run_line(char *line)
 	int count = parse_line(line, cmds);
 	run_cmds(cmds, count);
 }
+
+void
+sigchld_handler(int signum)
+{
+	wait(NULL);
+	print_bg();
+}
+
+void
+sigint_handler(int signum)
+{
+	sigint_caught = true;
+	if (isatty(0)) {
+		putc('\n', stdout);
+		prompt();
+	}
+}
+
+
+
+
