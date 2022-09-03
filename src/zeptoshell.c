@@ -225,7 +225,3 @@ sigint_handler(int signum)
 		prompt();
 	}
 }
-
-
-
-
